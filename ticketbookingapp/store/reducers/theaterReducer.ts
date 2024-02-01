@@ -1,151 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-interface TheaterState {
-  theaters: [
-    {
-      theaterId: number;
-      name: string;
-      address: string;
-      movies: [
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        }
-      ];
-    },
-    {
-      theaterId: number;
-      name: string;
-      address: string;
-      movies: [
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        }
-      ];
-    },
-    {
-      theaterId: number;
-      name: string;
-      address: string;
-      movies: [
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        }
-      ];
-    },
-    {
-      theaterId: number;
-      name: string;
-      address: string;
-      movies: [
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        },
-        {
-          name: string;
-          duration: string;
-          startTime: string;
-          seats: string[];
-          vip: number[];
-          booked: number[];
-        }
-      ];
-    }
-  ];
-}
-
 const initialState: TheaterState = {
   theaters: [
     {
@@ -306,28 +161,32 @@ const initialState: TheaterState = {
   ],
 };
 
+interface BookingSeats {
+  selectedSeats: number[];
+  theaterId: number;
+  movieIndex: number;
+  user: string;
+}
+
 export const theaterSlice = createSlice({
   name: "theaters",
   initialState,
   reducers: {
-    setSeats: (
-      state,
-      action: PayloadAction<{
-        selectedSeats: number[];
-        theaterId: number;
-        movieIndex: number;
-        str: string;
-      }>
-    ) => {
+    setSeats: (state, action: PayloadAction<BookingSeats>) => {
+      let obj = state;
+
       action.payload.selectedSeats.map((seat) => {
-        state.theaters[action.payload.theaterId].movies[
+        console.log(seat);
+        obj.theaters[action.payload.theaterId - 1].movies[
           action.payload.movieIndex
         ].booked.push(seat);
-        state.theaters[action.payload.theaterId].movies[
+        obj.theaters[action.payload.theaterId - 1].movies[
           action.payload.movieIndex
-        ].seats[seat] = action.payload.str;
-        return state;
+        ].seats[seat] = action.payload.user;
       });
+      console.log("obj:-> ", obj.theaters[0].movies[0].booked);
+      state = obj;
+      return state;
     },
   },
 });

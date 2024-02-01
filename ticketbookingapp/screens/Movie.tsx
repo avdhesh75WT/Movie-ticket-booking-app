@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Button } from "react-native";
 import { useAppSelector } from "../store/store";
 import { useEffect, useState } from "react";
+import { conversion } from "../utils";
 
 export default function Movie(params: any) {
   const state = useAppSelector((state) => state.theaters);
@@ -14,10 +15,6 @@ export default function Movie(params: any) {
     setVips(state.theaters[theaterId - 1].movies[movieIndex].vip);
     setBooked(state.theaters[theaterId - 1].movies[movieIndex].booked);
   }, []);
-
-  const conversion = (rowIdx: number, colIdx: number) => {
-    return rowIdx * 9 + (rowIdx + colIdx);
-  };
 
   const handleSeatClick = (rowIdx: number, colIdx: number) => {
     const seatIdx = rowIdx * 9 + (rowIdx + colIdx);

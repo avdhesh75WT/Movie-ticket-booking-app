@@ -6,7 +6,6 @@ import {
   ScrollView,
 } from "react-native";
 import { useAppSelector } from "../store/store";
-import { useEffect } from "react";
 
 export default function Theater(params: any) {
   const { route, navigation } = params;

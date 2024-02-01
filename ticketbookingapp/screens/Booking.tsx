@@ -1,39 +1,62 @@
-import { TextInput, View, Button, Text, StyleSheet } from "react-native";
+import {
+  TextInput,
+  View,
+  Button,
+  Text,
+  StyleSheet,
+  ToastAndroid,
+} from "react-native";
 import { useForm, Controller } from "react-hook-form";
-import { Form } from "react-hook-form";
 import { bookingSchema } from "../utils/validations";
 import { yupResolver } from "@hookform/resolvers/yup";
-import RazorpayCheckout, { CheckoutOptions } from "react-native-razorpay";
-import { useAppSelector } from "../store/store";
-import axios from "axios";
-import { useEffect, useState } from "react";
+// import axios from "axios"; //FOR BACKEND STRIPE API CALL
 import { useAppDispatch } from "../store/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setSeats } from "../store/reducers/theaterReducer";
-
-type RazorpayOptions = {
-  description: string;
-  image: string;
-  currency: string;
-  key: string;
-  amount: string;
-  name: string;
-  prefill: {
-    email: string;
-    contact: string;
-    name: string;
-  };
-  theme: { color: string };
-};
+// import { useStripe } from "@stripe/stripe-react-native"; //STRIPE LIBRARY IMPORT
+import { useEffect, useState } from "react";
 
 export default function Booking(params: any) {
   const dispatch = useAppDispatch();
-  let state = useAppSelector((state) => state.theaters);
-  let newObj = state;
-  console.log(state);
-  const [orderId, setOrderId] = useState<string>("");
+  const [bookingData, setBookingData] = useState<BookingSeats[]>();
+  // const [orderId, setOrderId] = useState<string>("");//PAYMENT GATEWAY ORDER ID
   const { route, navigation } = params;
   const { selectedSeats, cost, theaterId, movieIndex } = route.params;
+  // const { initPaymentSheet, presentPaymentSheet } = useStripe();//STRIPE GATEWAY METHODS
+
+  // FOR STRIPE PAYMENT GATEWAY
+  // const checkOut = async () => {
+  //   axios
+  //     .post("http://10.0.2.2:3000/", { cost })
+  //     .then((res) => {
+  //       console.log(res.data);
+  //       setOrderId(res.data.paymentIntent);
+  //     })
+  //     .catch((err) => {
+  //       console.log("err:-> ", err);
+  //     });
+
+  //   const initResponse = await initPaymentSheet({
+  //     merchantDisplayName: "avdhesh.dev",
+  //     paymentIntentClientSecret: orderId,
+  //   });
+  //   if (initResponse.error) {
+  //     console.log(initResponse.error);
+  //     return;
+  //   }
+
+  //   const paymentResponse = await presentPaymentSheet();
+
+  //   if (paymentResponse.error) {
+  //     console.log(
+  //       `Error code: ${paymentResponse.error.code}`,
+  //       paymentResponse.error.message
+  //     );
+  //     return;
+  //   }
+  //   console.log("Payment in successful");
+  // };
+
   const {
     control,
     handleSubmit,
@@ -42,86 +65,55 @@ export default function Booking(params: any) {
     resolver: yupResolver(bookingSchema),
   });
 
+  const fetchBookingData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("user");
+      if (value !== null) {
+        console.log("Retrieved value:", value);
+        const obj: BookingSeats[] = await JSON.parse(value);
+        setBookingData(obj);
+      } else {
+        console.log("Value is null. Key not found.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error retrieving data:", error);
+    }
+
+    console.log("booking data:-> ", bookingData);
+  };
+
+  useEffect(() => {
+    fetchBookingData();
+  }, []);
+
   const onSubmit = async (data: {
     name: string;
     email: string;
     contact: string;
   }) => {
-    console.log(data);
-
-    // axios
-    //   .post("http://10.0.2.2:3000/", { cost })
-    //   .then((res) => {
-    //     console.log(res);
-    //     setOrderId(res.data.id);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-
-    // const res = getMoviesFromApi();
-    // console.log(res);
-    // let options: CheckoutOptions = {
-    //   order_id: orderId,
-    //   description: "Movie ticket booking",
-    //   image:
-    //     "https://www.dlfpromenade.com/Assets/stores/832d34dc-25b4-4e44-a8a3-3fcd1edea9a6.png",
-    //   currency: "INR",
-    //   key: "rzp_test_Nz0DKL17sCwJU4",
-    //   amount: cost,
-    //   name: state.theaters[theaterId - 1].name,
-    //   prefill: {
-    //     email: data.email,
-    //     contact: data.contact,
-    //     name: data.name,
-    //   },
-    //   theme: { color: "#004daa" },
-    // };
-
-    // console.log(options);
-
-    // RazorpayCheckout.open(options)
-    //   .then((res) => {
-    //     console.log(res);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
     const str = data.name + " " + data.email + " " + data.contact;
-    // try {
-    AsyncStorage.setItem("name", str)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    // } catch (err) {
-    //   console.log(err);
-    // }
+    const obj: BookingSeats = {
+      selectedSeats,
+      theaterId,
+      movieIndex,
+      user: str,
+    };
+    dispatch(setSeats(obj));
 
-    // const fun = async (seat: number) => {
-    //   newObj.theaters[theaterId - 1].movies[movieIndex].booked.push(53);
-    //   newObj.theaters[theaterId - 1].movies[movieIndex].seats[53] = str;
-    // };
-    // console.log(selectedSeats, state);
-    // selectedSeats.map((seat: number) => {
-    //   fun(seat)
-    //     .then((res) => {
-    //       console.log(res);
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
-    // });
-    dispatch(setSeats({ selectedSeats, theaterId, movieIndex, str }));
-    AsyncStorage.setItem("name", str)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    let bookingDataCopy: BookingSeats[] | undefined;
+    if (bookingData?.length) {
+      bookingDataCopy = [...bookingData, obj];
+    } else {
+      bookingDataCopy = [obj];
+    }
+    try {
+      await AsyncStorage.setItem("user", JSON.stringify(bookingDataCopy));
+      console.log("Data stored successfully!");
+    } catch (error) {
+      console.error("Error storing data:", error);
+    }
+    ToastAndroid.show("Ticket booked successfully!", ToastAndroid.SHORT);
     navigation.navigate("Home");
   };
 
